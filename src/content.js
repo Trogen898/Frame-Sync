@@ -121,6 +121,8 @@
         _captureFrame(now, metadata) {
             // Stop capturing if the video is paused, hidden, or the extension is inactive
             if (!this.active || this.video.paused || document.hidden) {
+				//Needed to add a requestAnimationFrame call here as the video freezes in certain edge cases (changing tabs, clicking through video, disabling addon, etc.)
+				requestAnimationFrame(this._captureFrameFunc);
                 return;
             }
             
@@ -135,7 +137,8 @@
             this.frameCount++;
 
             // Continue the capture loop
-            this.video.requestVideoFrameCallback(this._captureFrameFunc);
+            //this.video.requestVideoFrameCallback(this._captureFrameFunc);  <--seems to limit framerate to 30 fps
+			requestAnimationFrame(this._captureFrameFunc);
         }
         
         // OPTIMIZATION 2: Simpler and more efficient frame selection logic
@@ -186,8 +189,9 @@
             if (this.active) return;
             this.active = true;
             this._createCanvasOverlay();
-            this.video.requestVideoFrameCallback(this._captureFrameFunc);
-            window.requestAnimationFrame(this._drawFrameFunc);
+			//this.video.requestVideoFrameCallback(this._captureFrameFunc);  <--- Commented out since we're using requestAnimationFrame function now
+            requestAnimationFrame(this._captureFrameFunc);
+			window.requestAnimationFrame(this._drawFrameFunc);
         }
 
         Deactivate() {
