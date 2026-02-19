@@ -36,6 +36,10 @@
 
 <body>
     <h1>Wireless Speaker Delay Measurement</h1>
+    <p>
+        <label for="frequencyInput">Tone frequency (Hz):</label>
+        <input id="frequencyInput" type="number" min="20" max="20000" step="1" value="1000">
+    </p>
     <button id="startButton">Start Test</button>
     <button id="useThisDelayButton" style="display: none;">Use This Delay</button>
     <p id="result"></p>

@@ -3,6 +3,9 @@ const useThisDelayButton = document.getElementById('useThisDelayButton');
 const beepDuration = 0.2;
 async function startTest() {
     useThisDelayButton.style.display = 'none';
+    const frequencyInput = document.getElementById('frequencyInput');
+    const toneFrequency = Number.parseFloat(frequencyInput?.value);
+    const testFrequency = Number.isFinite(toneFrequency) && toneFrequency > 0 ? toneFrequency : 1000;
     const resultElement = document.getElementById('result');
     const canvas = document.getElementById('waveform');
     const canvasCtx = canvas.getContext('2d');
@@ -46,7 +49,7 @@ async function startTest() {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const oscillator = audioContext.createOscillator();
-        oscillator.frequency.value = 12000;
+        oscillator.frequency.value = testFrequency;
         oscillator.type = 'sine';
         oscillator.connect(audioContext.destination);
 
