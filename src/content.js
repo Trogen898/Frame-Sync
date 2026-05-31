@@ -50,6 +50,32 @@
             this.lastDrawnFrameIndex = -1; // Keep track of what we last drew
             this.resizeObserver = null; // For efficient resize detection
 
+            // State variable to track if the video is currently seeking (skipping time)
+            this.isSeeking = false;
+
+            this._seekingFunc = () => {
+                this.isSeeking = true;
+                // Clear the canvas to make it transparent, revealing YouTube's native loader
+                if (this.ctx && this.canvas) {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+                // Flush the old buffer to prevent "ghost" frames from playing after the skip
+                for (let i = 0; i < this.maxBuffer; i++) {
+                    this.buffer[i].captureTs = 0;
+                }
+                this.frameCount = 0;
+                this.lastDrawnFrameIndex = -1;
+            };
+
+            this._seekedFunc = () => {
+                // Video skip completed, resume normal sync behavior
+                this.isSeeking = false;
+            };
+
+            // Event listeners to handle user timeline navigation fluidly
+            this.video.addEventListener('seeking', this._seekingFunc);
+            this.video.addEventListener('seeked', this._seekedFunc);
+
             this.SetMaxBuffer(maxBuffer);
             video.frameSyncObj = this;
             this._captureFrameFunc = this._captureFrame.bind(this);
@@ -119,8 +145,8 @@
         }
 
         _captureFrame(now, metadata) {
-            // Stop capturing if the video is paused, hidden, or the extension is inactive
-            if (!this.active || this.video.paused || document.hidden) {
+            // Stop capturing if the video is paused, hidden, currently seeking, or the extension is inactive
+            if (!this.active || this.video.paused || document.hidden || this.isSeeking) {
 				//Needed to add a requestAnimationFrame call here as the video freezes in certain edge cases (changing tabs, clicking through video, disabling addon, etc.)
 				requestAnimationFrame(this._captureFrameFunc);
                 return;
@@ -162,7 +188,8 @@
 
 
         _drawFrame(now) {
-            if (!this.active || this.video.paused) {
+            if (!this.active || this.video.paused || this.isSeeking) {
+                // Stop drawing if the video is paused, hidden, currently seeking, or the extension is inactive
                 window.requestAnimationFrame(this._drawFrameFunc);
                 return;
             }
@@ -196,6 +223,11 @@
 
         Deactivate() {
             this.active = false;
+
+            // Remove event listeners to avoid memory leaks when extension is deactivated
+            if (this._seekingFunc) this.video.removeEventListener('seeking', this._seekingFunc);
+            if (this._seekedFunc) this.video.removeEventListener('seeked', this._seekedFunc);
+
             if (this.canvas) {
                 this.canvas.remove();
                 this.canvas = null;
