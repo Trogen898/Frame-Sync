@@ -47,7 +47,8 @@
     <hr>
     <h2>Usage Instructions:</h2>
     <p>This tool plays a high-frequency sound to measure the delay of your wireless speaker. Please set your computer's sound output to the wireless speaker.</p>
-    <p>When prompted, grant microphone access. The tool will record a 4-second audio clip of the sound received through the microphone to calculate the delay. If the delay exceeds 4 seconds, the measurement may fail.</p>
+    <p>When prompted, grant microphone access. The test runs <b>continuously</b>: it plays short beeps at the tone frequency entered above (you can change it while the test runs - the next beep uses the new value), listens for each beep through the microphone, and reports per-beep and median delay. The first beep is a warm-up and is excluded from the median. Press "Stop Test" when you have enough samples, then "Use This Delay" to save the median.</p>
+    <p><b>Important for Bluetooth headsets:</b> make the built-in microphone (not the headset microphone) the default input device before measuring. A headset mic forces the HFP call profile and adds its own uplink delay, which inflates the result.</p>
     <p>For best results, place your computer as close as possible to the speaker and keep the surrounding environment quiet.</p>
     <b>If the measurement fails, you can manually set the delay in the extension popup.</b>
     <script src="./measure.js">
